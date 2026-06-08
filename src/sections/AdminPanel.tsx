@@ -33,9 +33,7 @@ export function AdminPanel() {
 
   const fetchFleet = async () => {
     try {
-      const { query, where } = await import('firebase/firestore');
-      const fleetQuery = query(collection(db, 'fleet'), where('name', '>=', ''));
-      const querySnapshot = await getDocs(fleetQuery);
+      const querySnapshot = await getDocs(collection(db, 'fleet'));
       const data: any[] = [];
       querySnapshot.forEach((docSnap) => {
         data.push({ id: docSnap.id, ...docSnap.data() });

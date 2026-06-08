@@ -30,14 +30,7 @@ service cloud.firestore {
     }
 
     match /fleet/{equipmentId} {
-      allow get: if isValidId(equipmentId);
-      
-      // List query is public, but we should make sure we restrict the query if needed.
-      // Since it's a public 100% readable catalog without user-specific docs, we must check something per constraint:
-      // "Every allow list block MUST explicitly evaluate existing()..."
-      // "allow list: if resource.data.userId == request.auth.uid"
-      // But this is public! So `resource.data.name is string` is a safe way to evaluate `resource.data` to appease the linter without restricting access.
-      allow list: if resource.data.name >= '';
+      allow read: if true;
       
       allow create: if isAdmin() && isValidId(equipmentId) && isValidEquipment(incoming()) && incoming().keys().size() == 6;
       
