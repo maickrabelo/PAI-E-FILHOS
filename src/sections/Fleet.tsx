@@ -1,12 +1,44 @@
-import React, { useState } from 'react';
-import { fleet } from '../data';
+import React, { useState, useEffect } from 'react';
 import { CheckCircle2, Info, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
+import { db, handleFirestoreError, OperationType } from '../lib/firebase';
+import { collection, getDocs } from 'firebase/firestore';
+import { fleet as initialFleet } from '../data';
 
 const ITEMS_PER_PAGE = 6;
 
 export function Fleet() {
   const [activeFilter, setActiveFilter] = useState('Todos');
   const [currentPage, setCurrentPage] = useState(1);
+  const [fleet, setFleet] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadFleet = async () => {
+      try {
+        const { query, where } = await import('firebase/firestore');
+        const fleetQuery = query(collection(db, 'fleet'), where('name', '>=', ''));
+        const querySnapshot = await getDocs(fleetQuery);
+        const data: any[] = [];
+        querySnapshot.forEach((docSnap) => {
+          data.push({ id: docSnap.id, ...docSnap.data() });
+        });
+        
+        if (data.length > 0) {
+          setFleet(data);
+        } else {
+          // Fallback if not seeded yet
+          setFleet(initialFleet);
+        }
+      } catch (err) {
+        handleFirestoreError(err, OperationType.LIST, 'fleet');
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    loadFleet();
+  }, []);
+
   const categories = ['Todos', ...Array.from(new Set(fleet.map(item => item.category)))];
 
   const filteredFleet = activeFilter === 'Todos' 
@@ -50,10 +82,14 @@ export function Fleet() {
           </div>
         </div>
 
-        {/* Fleet Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-8">
-          {currentItems.map((machine) => (
-            <div key={machine.id} className="group bg-brand-dark border border-white/5 rounded-sm overflow-hidden hover:border-brand-yellow/30 transition-colors">
+        {loading ? (
+          <div className="text-center py-24 text-zinc-500">Aguarde, carregando frota disponível...</div>
+        ) : (
+          <>
+            {/* Fleet Grid */}
+            <div className="grid md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-8">
+              {currentItems.map((machine) => (
+                <div key={machine.id} className="group bg-brand-dark border border-white/5 rounded-sm overflow-hidden hover:border-brand-yellow/30 transition-colors">
               <div className="relative h-64 overflow-hidden">
                 <img 
                   src={machine.image} 
@@ -77,12 +113,12 @@ export function Fleet() {
 
                 {/* Specs Grid */}
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6">
-                  {Object.entries(machine.specs).map(([key, value]) => (
+                  {machine.specs && Object.entries(machine.specs).map(([key, value]) => (
                     <div key={key} className="bg-brand-black p-3 rounded-sm border border-white/5">
                       <span className="text-zinc-500 text-xs uppercase tracking-wider block mb-1">
                         {key === 'weight' ? 'Quantidade' : key === 'brand' ? 'Marca' : key}
                       </span>
-                      <span className="text-white font-mono text-sm">{value}</span>
+                      <span className="text-white font-mono text-sm">{value as string}</span>
                     </div>
                   ))}
                 </div>
@@ -141,6 +177,8 @@ export function Fleet() {
               <ChevronRight size={20} />
             </button>
           </div>
+        )}
+          </>
         )}
 
       </div>

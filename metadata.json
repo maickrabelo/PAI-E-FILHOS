@@ -1,5 +1,8 @@
 {
   "name": "Pai e Filhos Locações",
-  "description": "Site institucional focado em locação de frota pesada, serviços de terraplanagem e demolição.",
-  "requestFramePermissions": []
+  "description": "Site institucional focado em locação de frota pesada, serviços de terraplanagem e demolição. Agora com Firebase Firestore Database e autenticação Admin Google.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
 }

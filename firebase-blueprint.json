@@ -1,0 +1,40 @@
+{
+  "entities": {
+    "Equipment": {
+      "title": "Equipment",
+      "description": "Represents a piece of equipment in the fleet available for deployment.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "category": {
+          "type": "string"
+        },
+        "image": {
+          "type": "string"
+        },
+        "readyToDeploy": {
+          "type": "boolean"
+        },
+        "specs": {
+          "type": "object",
+          "properties": {
+            "weight": { "type": "string" },
+            "brand": { "type": "string" }
+          }
+        },
+        "idealFor": {
+          "type": "string"
+        }
+      },
+      "required": ["name", "category", "image", "readyToDeploy", "specs", "idealFor"]
+    }
+  },
+  "firestore": {
+    "/fleet/{equipmentId}": {
+      "schema": { "$ref": "#/entities/Equipment" },
+      "description": "A collection containing available equipment. Admin can create, read, update, delete. Public can only read."
+    }
+  }
+}
